@@ -24,9 +24,9 @@ jobs:
       - name: Deploy to CentOS via SSH
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
+          host: ${{secrets.DEPLOY_HOST}}
+          username: ${{secrets.DEPLOY_USER}}
+          key: ${{secrets.DEPLOY_KEY}}
           port: 22
           source: "target/*.jar"
           target: "/home/${{ secrets.DEPLOY_USER }}/myapp/"
