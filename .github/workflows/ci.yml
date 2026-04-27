@@ -1,12 +1,11 @@
-name: Java CI with main
+name: java CI/CD
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
+
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest   # GitHub 提供的虚拟环境
 
     steps:
@@ -17,8 +16,33 @@ jobs:
           java-version: 8
           distribution: 'temurin'
       - name: Build with Maven
-        run: mvn clean compile
-      - name: Run test
+        run: mvn clean package -DskipTests   # 先打包，之后跑测试也行
+
+      - name: Run tests
         run: mvn test
+
+      - name: Deploy to CentOS via SSH
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          source: "target/*.jar"
+          target: "/home/${{ secrets.DEPLOY_USER }}/myapp/"
+          strip_components: 1   # 去掉 target/ 路径前缀
+
+      - name: Restart application on CentOS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /home/${{ secrets.DEPLOY_USER }}/myapp
+            # 杀掉旧的 java 进程（如果存在）
+            pkill -f 'java -jar' || true
+             # 启动新的 jar（后台运行，输出到日志）
+            nohup java -jar *.jar > app.log 2>&1 &
 
 
