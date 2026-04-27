@@ -27,7 +27,7 @@ jobs:
           host: ${{secrets.DEPLOY_HOST}}
           username: ${{secrets.DEPLOY_USER}}
           key: ${{secrets.DEPLOY_KEY}}
-          port: 22
+          port: 2222
           source: "target/*.jar"
           target: "/home/${{ secrets.DEPLOY_USER }}/myapp/"
           strip_components: 1   # 去掉 target/ 路径前缀
